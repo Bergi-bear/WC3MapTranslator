@@ -15,6 +15,7 @@ def TranslateOnceString(texts, IAM_TOKEN):
         "targetLanguageCode": target_language,
         "texts": texts,
         "folderId": folder_id,
+        # для повышения качества перевода язык источника можно указать вручную
         "sourceLanguageCode": "zh"
     }
 
@@ -43,7 +44,7 @@ def TranslateWTS(path, mapName):
         print("Переводить нечего!, завершаем работу")
         return False
     clearWTS(path + '\\war3map.wts')
-    GetCleanText(path, mapName)
+    GetCleanText(path, mapName)  # перевод здесь
 
 
 def ExtractMap(map):
@@ -69,6 +70,12 @@ def FindAllMaps(fileDir):
             list.append(i)
     print("Найдено карт для перевода " + str(len(list)))
     return list
+
+
+def TranslateCampaings():
+    pathWTS = WORK_FOLDER + "\\" + "war3campaign.wts"
+    clearWTS(pathWTS)
+    GetCleanText(WORK_FOLDER, "")
 
 
 def StarProgram():
@@ -118,9 +125,17 @@ def getStringNumber(contents):
     return result
 
 
+def PackMap(path, mapName):
+    print("Перепаковываем карту обратно")
+    os.system("mpqtool new ./" + "\"" + "" + path + "\"" + " " + "\"" + "Translated\\" + mapName + "\"")
+
+
 def GetCleanText(path, mapName):
     print("Дробим и очищаем строки")
-    f = open(path + '\\war3map.wts', 'r', encoding='utf-8', errors='ignore')
+    wts = "war3map.wts"
+    if mapName == "":
+        wts = "war3campaign.wts"
+    f = open(path + "\\" + wts, 'r', encoding='utf-8', errors='ignore')
     contents = f.read()
     wtsText = getStringNumber(contents)
     # print(contents)
@@ -134,18 +149,20 @@ def GetCleanText(path, mapName):
         newWTS = newWTS + "STRING" + wtsText[0][k] + "\n" + "{\n" + cleanString + "\n}\n"
         k = k + 1
     # print(newWTS)
-    file = open(path + '\\war3map#0419.wts', 'w+', encoding='utf-8')
+    # 0419
+    file = open(path + '\\' + wts, 'w+', encoding='utf-8')
     file.write(str(newWTS))
     file.close()
-    print("Перепаковываем карту обратно")
-    os.system("mpqtool new ./" + "\"" + "" + path + "\"" + " " + "\"" + "Translated\\" + mapName + "\"")
+    if not mapName == "":
+        PackMap(path, mapName)
 
 
 # path = ExtractMap("1.w3x")
 # TranslateWTS(path)
 # clearWTS("Folder_ChinaCampaings\FB02.w3x\war3map.wts")
-WORK_FOLDER = "ChinaCampaings"  # имя папки
+WORK_FOLDER = "SoDCv0.025"  # имя папки
 
 StarProgram()
+TranslateCampaings()
 # TranslateWTS("Folder_ChinaCampaings\CAMERA B.w3x", "CAMERA B.w3x")
 # GetCleanText("Folder_ChinaCampaings\PAGE02.w3x","Folder_ChinaCampaings\PAGE02.w3x\war3map.wts")
